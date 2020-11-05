@@ -1,16 +1,22 @@
 //create using:
-// 
+// gcc --std=gnu99 -o main main.c  
 //then run using:
 //
 
+#include <sys/stat.h>
+#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <fcntl.h>
 #include <string.h>
+#include <signal.h>
 #include <stdbool.h>
 
 
 struct movie *processFile(char *filePath);
 struct movie *createMovie(char *currLine);
+void redirectInput(char* inputFile);
+void redirectOutput(char* outputFile);
 
 int main(int argc, char *argv[])
 {
@@ -21,6 +27,12 @@ int main(int argc, char *argv[])
     char *inputFile = NULL;
     char *outputFile = NULL;
     
+    //save stdin and stdout
+    int stdin_save = dup(STDIN_FILENO); // save stdin position
+    int stdout_save = dup(STDOUT_FILENO); // save stdout position
+
+
+
     for (int argvCounter = 0; argv[argvCounter] != NULL; argvCounter++)
     {
         if (strcmp(argv[argvCounter], "<") == 0) // input 
@@ -46,8 +58,10 @@ int main(int argc, char *argv[])
         }
     }
     
+
     //redirect input and/or output here:
-    
+    if (inputFlag == true)
+        redirectInput(inputFile);
     
     
     if (outputFlag == true && inputFlag == true) //both input and output needed
@@ -55,14 +69,23 @@ int main(int argc, char *argv[])
         runBothInputOutputFlag = true;
     }
 
-    struct movie *list = processFile(myFile);                                   //******need to change to arg
+    dup2(stdout_save, STDOUT_FILENO); // restore standard out
+    dup2(stdin_save, STDIN_FILENO); // restore standard in 
+
+    return EXIT_SUCCESS;
+}
+
+
+
+/*
+
+    struct movie *list = processFile(myFile);                                   ******need to change to arg
     int numOfMovies = movieCount(list);
     printf("Processed file %s and parsed data for %i movies\n\n",
         myFile, numOfMovies);
 
     
-    return EXIT_SUCCESS;
-}
+
 
 
 
@@ -209,4 +232,58 @@ struct movie *processFile(char *filePath)
     fclose(moviesFile); //close file
     return head;
 }
+
+
+*/
+
+
+
+void redirectInput(char* inputFile)
+{
+    int fd0 = open(inputFile, O_RDONLY); //open input file read only
+    if (fd0 == -1) //if error opening input file, display error
+    {
+        printf("cannot open %s for input\n", inputFile);
+        fflush(stdout);
+        exit(1);
+    } 
+    else 
+    {
+        if (dup2(fd0, STDIN_FILENO) == -1)  //redirect stdin to input file descriptor
+        {
+        	perror("dup2");
+        	fflush(stdout);
+        }
+        close(fd0);	
+    }
+    return;
+}
+
+
+
+
+void redirectOutput(char* outputFile)
+{
+    //open output file
+    int fd1 = open(outputFile, O_WRONLY | O_CREAT | O_APPEND, 0644);
+    if (fd1 == -1) //if error creating output file, display error
+    {
+        printf("cannot create %s for output\n", outputFile);
+        fflush(stdout);
+        exit(1);			
+    } 
+    else
+    {
+        if (dup2(fd1, STDOUT_FILENO) == -1) //redirect stout to output file descriptor
+        {
+            perror("dup2");
+            fflush(stdout);
+        }
+        close(fd1);	
+    }
+    return;
+}
+
+
+
 
