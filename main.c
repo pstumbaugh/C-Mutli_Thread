@@ -166,7 +166,7 @@ void *inputData(void *args)
     
     //Initialize all to null
     for (int stringsInitializeCounter = 0; stringsInitializeCounter <= 50; stringsInitializeCounter++)
-        strings[stringsInitializeCounter] = '\0';
+        strings[stringsInitializeCounter] = NULL;
 
 
     for (int inputDataCounter = 0; inputDataCounter <= 50; inputDataCounter++)
