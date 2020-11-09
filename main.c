@@ -36,7 +36,7 @@ Max characters per line: 1000 char
 
 /*
 create executable by typing in the command line:
-    gcc --std=gnu99 -o main main.c
+    gcc --std=gnu99 -pthread -o main main.c
 then run using:
     ./main 
     
