@@ -69,6 +69,7 @@ https://repl.it/@cs344/65prodconspipelinec#main.c
 #include <stdbool.h>
 #include <pthread.h>
 
+
 #define MAXLINESIZE 1000
 
 //GLOBAL VARIABLES
@@ -120,7 +121,6 @@ int main(int argc, char **argv)
     //create max size for variable
     remainingFragment = (char*) malloc(MAXLINESIZE); 
 
-        
     //create pthread_t variables for each thread
     pthread_t input_t, lineSeperator_t, plusSignConversion_t, output_t;
     
@@ -159,13 +159,8 @@ void *inputData(void *args)
     size_t size = 1000; //1000 is max size of string
     int stringLinePosition = 0;
     
-
-
-        
     for (int inputDataCounter = 0; inputDataCounter <= 50; inputDataCounter++)
     {
-        char* myTestString = (char*) malloc(MAXLINESIZE); 
-
         //check if the next char is the EOF (returns as -1 if true)
         //for stdin from a file
         char c = getc(stdin);
@@ -173,6 +168,8 @@ void *inputData(void *args)
             break;
         else //put char back into stdin
             ungetc(c, stdin);
+
+        char* myTestString = (char*) malloc(MAXLINESIZE); 
         
         //get the line of input. Save it in strings[position]
         bytes_read = getline (&myTestString, &size, stdin); 
@@ -183,8 +180,6 @@ void *inputData(void *args)
             perror ("Error reading input");
             exit(1);
         }
-        
-        
         
         //if STOP is encountered, send current string and stop reading input
         if (checkForStopPreLineSeperator(myTestString) == true)
@@ -501,7 +496,11 @@ void *writeToOutput(void *args)
     
         //Check if the item is, by itself, a STOP
         if (checkForStopPostLineSeperator(originalString) == true)
+        {
+            free(newString);
+            free(originalString);
             break;
+        }
     
         //Initialize newString to null
         for (int newStringInitializeCounter = 0; newStringInitializeCounter <= 1000; newStringInitializeCounter++)
@@ -536,12 +535,14 @@ void *writeToOutput(void *args)
             //check if this fragment has to STOP command, if so, exit loop
             if (checkForStopPostLineSeperator(fragments[loopCounter]) == true)//a STOP is found
             {
+                free(fragments[loopCounter]);
                 toStop = true;
                 break;
             }
             
             //print the 80 character fragmented line 
             printf("%s", fragments[loopCounter]); 
+            free(fragments[loopCounter]);
             //print a new line
             printf("\n"); 
         }
@@ -561,10 +562,15 @@ void *writeToOutput(void *args)
         //check if a STOP is encountered
         if (checkForStopPostLineSeperator(remainingFragment) == true)
             toStop = true;
-        
+
+        free(originalString);
+
         //if a STOP was ever encounted, break from loop and return
         if (toStop == true)
-            break;        
+        {
+            free(newString);
+            break;
+        }
     }
     return NULL;
 }
