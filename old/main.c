@@ -36,7 +36,7 @@ Max characters per line: 1000 char
 
 /*
 create executable by typing in the command line:
-    gcc --std=gnu99 -o main main.c
+    gcc --std=gnu99 -pthread -o main main.c
 then run using:
     ./main 
     
@@ -119,8 +119,7 @@ int main(int argc, char **argv)
 {
     //create max size for variable
     remainingFragment = (char*) malloc(MAXLINESIZE); 
-
-        
+    
     //create pthread_t variables for each thread
     pthread_t input_t, lineSeperator_t, plusSignConversion_t, output_t;
     
@@ -158,14 +157,20 @@ void *inputData(void *args)
     int bytes_read;
     size_t size = 1000; //1000 is max size of string
     int stringLinePosition = 0;
+
+    char* strings[50]; //create new string data to hold data
+    for (int stringMallocCounter = 0; stringMallocCounter < 50; stringMallocCounter++)
+    {
+        strings[stringMallocCounter] = (char*) malloc(1000 * sizeof(char));
+    }
     
+    //Initialize all to null
+    for (int stringsInitializeCounter = 0; stringsInitializeCounter <= 50; stringsInitializeCounter++)
+        strings[stringsInitializeCounter] = NULL;
 
 
-        
     for (int inputDataCounter = 0; inputDataCounter <= 50; inputDataCounter++)
     {
-        char* myTestString = (char*) malloc(MAXLINESIZE); 
-
         //check if the next char is the EOF (returns as -1 if true)
         //for stdin from a file
         char c = getc(stdin);
@@ -175,7 +180,7 @@ void *inputData(void *args)
             ungetc(c, stdin);
         
         //get the line of input. Save it in strings[position]
-        bytes_read = getline (&myTestString, &size, stdin); 
+        bytes_read = getline (&strings[stringLinePosition], &size, stdin); 
         
         //if error reading string
         if (bytes_read == -1) 
@@ -184,18 +189,16 @@ void *inputData(void *args)
             exit(1);
         }
         
-        
-        
         //if STOP is encountered, send current string and stop reading input
-        if (checkForStopPreLineSeperator(myTestString) == true)
+        if (checkForStopPreLineSeperator(strings[stringLinePosition]) == true)
         {
-            produceBuffer1(myTestString);
+            produceBuffer1(strings[stringLinePosition]);
             break;
         }
         else
         {
             //put the item into the buffer for line separator thread
-            produceBuffer1(myTestString); 
+            produceBuffer1(strings[stringLinePosition]); 
         }
         
         //Increment the saving position
@@ -269,8 +272,6 @@ void *lineSeperator(void *args)
             //get the next line
             token = strtok(NULL, delimiter);
         }
-        free(item);
-        //item = '\0';
         
         //send the returningString to the second buffer
         produceBuffer2(returningString); 
@@ -278,6 +279,7 @@ void *lineSeperator(void *args)
         //check for a STOP. If found break from loop and return
         if (checkForStopPostLineSeperator(returningString) == true)
             break;
+        
     }
 
     return NULL;
