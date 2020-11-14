@@ -1,4 +1,6 @@
-
+/*
+Patrick Stumbaugh
+*/
 
 #include <sys/stat.h>
 #include <stdio.h>
@@ -188,6 +190,10 @@ void *lineSeperator(void *args)
         
         //create max size for new string 
         returningString = (char *) malloc (size); 
+        
+        //Initialize returningString to null
+        for (int returningStringCounter = 0; returningStringCounter < 1000; returningStringCounter++)
+            returningString[returningStringCounter] = '\0';
         
         // get the first token up through the new line character 
         //replace the new line character with a " ". 
@@ -441,7 +447,7 @@ void *writeToOutput(void *args)
         }
     
         //Initialize newString to null
-        for (int newStringInitializeCounter = 0; newStringInitializeCounter <= 1000; newStringInitializeCounter++)
+        for (int newStringInitializeCounter = 0; newStringInitializeCounter < 1000; newStringInitializeCounter++)
             newString[newStringInitializeCounter] = '\0';
             
         //append the original string to whatever is remaining 

@@ -26,7 +26,7 @@ Thread 2 and 3 both consume from a buffer and produce to a buffer
 Thread 4 consumes from a buffer 
 
 The program will stop reading and printing once "STOP" is found. This must be 
-on it's own line followed immediately by a newline character.
+on its own line followed immediately by a newline character.
 
 Max line to be read: 50 lines
 Max characters per line: 1000 char
@@ -34,22 +34,35 @@ Max characters per line: 1000 char
 
 --------------------------------------------------------------------------------
 create executable by typing in the command line:
-    gcc --std=gnu99 -pthread -o main main.c
+    gcc --std=gnu99 -pthread -o line_processor main.c
 then run using:
-    ./main 
+    ./line_processor 
+
+(The C code is stored in main.c. The executable will be create, as shown above,
+and given the name line_processor. You will be executing, running, the
+line_processor file)
     
-NOTE - if you don't give any command line arguments after ./main, it will 
+NOTE - if you don't give any command line arguments after ./line_processor, it will 
 assume you will be entering your own text. You may include a text file to read 
 from by having it in the same directory and calling it after. 
 ie: You have a file named input.txt to read from. Run it by creating the
-executable and then in the command line, run by typing: "./main < input.txt".
+executable and then in the command line, run by typing: "./line_processor < input.txt".
 This will redirect stdin to that text file. 
 
 You may also output to a specific file (create/overwrite only) similarly, by 
-typing in the command line (ie): "./main > output.txt"
+typing in the command line (ie): "./line_processor > output.txt"
 
 Or, you can combine these functions by typing (ie):
-"./main < input.txt > output.txt"
+"./line_processor < input.txt > output.txt"
 This will read from input.txt and then print to output.txt
 
+--------------------------------------------------------------------------------
+/*
+Parts of the producer and buffer functions are adapted from:
+https://repl.it/@cs344/65prodconspipelinec#main.c
+*/
 
+--------------------------------------------------------------------------------
+NOTE - There is a small memory leak, I belive to be in the writeToOuput thread.
+I am working on this still, however even with this leak, the program runs as 
+expected. 
